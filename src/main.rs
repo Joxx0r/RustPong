@@ -1,4 +1,6 @@
-use tetra::graphics::{self, Color};
+use tetra::graphics::{self, Color, Texture};
+use tetra::input::{self, Key};
+use tetra::math::Vec2;
 use tetra::{Context, ContextBuilder, State};
 
 struct GameState{}
