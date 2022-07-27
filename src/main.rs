@@ -9,6 +9,8 @@ const WINDOW_WIDTH: f32 = 640.0;
 const WINDOW_HEIGHT: f32 = 480.0;
 const PADDLE_SPEED: f32 = 8.0;
 const BALL_SPEED: f32 = 5.0;
+const PADDLE_SPIN: f32 = 4.0;
+const BALL_ACC: f32 = 0.05;
 
 enum EntityRotationType {
     Default,
@@ -166,12 +168,21 @@ impl State for GameState {
             self.player2.location.y += PADDLE_SPEED;
         }
 
-
-        if self.player1.intersects_with_object(&self.ball) {
-            self.ball.velocity = -self.ball.velocity;
+        let result = if self.player1.intersects_with_object(&self.ball) {
+            Some(&self.player1)
         }
-        if self.player2.intersects_with_object(&self.ball) {
-            self.ball.velocity = -self.ball.velocity;
+        else if self.player2.intersects_with_object(&self.ball) {
+            Some(&self.player2)
+        }
+        else  {
+            None
+        };
+
+        if let Some(paddle) = result  {
+            self.ball.velocity.x = -(self.ball.velocity.x + (BALL_ACC * self.ball.velocity.x.signum()));
+            let offset = (paddle.location.y - self.ball.location.y) / paddle.height();
+
+            self.ball.velocity.y += PADDLE_SPIN * -offset;
         }
 
         self.ball.location += self.ball.velocity;
