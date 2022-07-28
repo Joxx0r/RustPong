@@ -1,3 +1,4 @@
+use std::collections::btree_map::Entry;
 use std::panic::Location;
 
 use tetra::graphics::{self, Color, Rectangle, Texture};
@@ -20,24 +21,30 @@ enum EntityRotationType {
 }
 
 struct Entity {
-    texture: Texture,
+    texture: Option<Texture>,
     location: Vec2<f32>,
     velocity: Vec2<f32>,
     rotation_type: EntityRotationType,
 }
 
+impl Default for Entity {
+    fn default() -> Self {
+        return Entity { texture:None, location: Vec2::zero(), velocity:Vec2::zero(), rotation_type:EntityRotationType::Default};
+    }
+}
+
 impl Entity {
-    fn new(texture: Texture, location: Vec2<f32>, rotation_type: EntityRotationType) -> Entity {
+    fn new(texture: Option<Texture>, location: Vec2<f32>, rotation_type: EntityRotationType) -> Entity {
         Entity {
             texture: texture,
             location: location,
             rotation_type: rotation_type,
-            velocity: Vec2::zero(),
+            ..Default::default()
         }
     }
 
     fn new_with_velocity(
-        texture: Texture,
+        texture: Option<Texture>,
         location: Vec2<f32>,
         rotation_type: EntityRotationType,
         velocity: Vec2<f32>,
@@ -50,14 +57,15 @@ impl Entity {
         }
     }
 
-    fn draw(&mut self, ctx: &mut Context) {
+    fn draw(&self, ctx: &mut Context) {
         let params: tetra::graphics::DrawParams = graphics::DrawParams {
             position: self.location,
             rotation: self.draw_angle(),
             origin: self.get_draw_position(),
             ..Default::default()
         };
-        self.texture.draw(ctx, params);
+       
+        self.texture.as_ref().unwrap().draw(ctx, params);
     }
 
     fn width(&self) -> f32 {
@@ -106,11 +114,11 @@ impl Entity {
     }
 
     fn width_texture(&self) -> f32 {
-        return self.texture.width() as f32;
+        return self.texture.as_ref().unwrap().width() as f32;
     }
 
     fn height_texture(&self) -> f32 {
-        return self.texture.height() as f32;
+        return self.texture.as_ref().unwrap().height() as f32;
     }
 
     fn get_draw_position(&self) -> Vec2<f32> {
@@ -200,22 +208,17 @@ impl State for GameState {
 
 impl GameState {
     fn new(ctx: &mut Context) -> tetra::Result<GameState> {
-        let mut paddle_texture1 = Texture::new(ctx, "./resources/paddleBlueRotate90.png")?;
-        let mut paddle_texture2 = Texture::new(ctx, "./resources/paddleRedRotate90.png")?;
-        let mut paddle_texture3 = Texture::new(ctx, "./resources/ballBlue.png")?;
+        let paddle_texture1 = Texture::new(ctx, "./resources/paddleBlueRotate90.png")?;
+        let paddle_texture2 = Texture::new(ctx, "./resources/paddleRedRotate90.png")?;
+        let paddle_texture3 = Texture::new(ctx, "./resources/ballBlue.png")?;
         let paddle_position1 = Vec2::new(20.0, (WINDOW_HEIGHT) / 2.0);
         let paddle_position2 = Vec2::new(620.0, (WINDOW_HEIGHT) / 2.0);
         let paddle_position3 = Vec2::new((WINDOW_WIDTH as f32) / 2.0, (WINDOW_HEIGHT as f32) / 2.0);
         let ball_velocity = Vec2::new(-BALL_SPEED, 0.0);
         Ok(GameState {
-            player1: Entity::new(paddle_texture1, paddle_position1, EntityRotationType::Default),
-            player2: Entity::new(paddle_texture2, paddle_position2, EntityRotationType::Default),
-            ball: Entity::new_with_velocity(
-                paddle_texture3,
-                paddle_position3,
-                EntityRotationType::Default,
-                ball_velocity,
-            ),
+            player1: Entity::new(Some(paddle_texture1), paddle_position1, EntityRotationType::Default),
+            player2: Entity::new(Some(paddle_texture2), paddle_position2, EntityRotationType::Default),
+            ball: Entity::new_with_velocity( Some(paddle_texture3), paddle_position3,EntityRotationType::Default, ball_velocity),
         })
     }
 }
