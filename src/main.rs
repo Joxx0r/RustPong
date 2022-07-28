@@ -1,6 +1,3 @@
-use std::collections::btree_map::Entry;
-use std::panic::Location;
-
 use tetra::graphics::{self, Color, Rectangle, Texture};
 use tetra::input::{self, Key};
 use tetra::math::Vec2;
@@ -13,6 +10,7 @@ const BALL_SPEED: f32 = 5.0;
 const PADDLE_SPIN: f32 = 4.0;
 const BALL_ACC: f32 = 0.05;
 
+#[allow(dead_code)]
 enum EntityRotationType {
     Default,
     Ninty,
