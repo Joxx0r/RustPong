@@ -1,4 +1,2 @@
 # RustPong
-Basic learning rust tutorial pong
-
-Based on https://tetra.seventeencups.net/tutorial and altered based on exploration.
+Basic learning rust tutorial https://tetra.seventeencups.net/tutorial. Altered and edit based on personal learnings
